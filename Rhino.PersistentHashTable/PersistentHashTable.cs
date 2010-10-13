@@ -22,6 +22,8 @@ namespace Rhino.PersistentHashTable
 		private IDictionary<string, JET_COLUMNID> replicationColumns;
 		private IDictionary<string, JET_COLUMNID> replicationRemovalColumns;
 
+        private readonly ReaderWriterLockSlim lockObject = new ReaderWriterLockSlim();
+
 		public Guid Id { get; private set; }
 
 		public PersistentHashTable(string database)
@@ -165,28 +167,53 @@ namespace Rhino.PersistentHashTable
 
 		public void Dispose()
 		{
-			GC.SuppressFinalize(this);
-			Api.JetTerm2(instance, TermGrbit.Abrupt);
+            lockObject.EnterWriteLock();
+            try
+            {
+                Api.JetTerm2(instance, TermGrbit.Complete);
+                GC.SuppressFinalize(this);
+            }
+            finally
+            {
+                lockObject.ExitWriteLock();
+            }
 		}
 
 		~PersistentHashTable()
 		{
-			try
-			{
-				Trace.WriteLine(
-					"Disposing esent resources from finalizer! You should call PersistentHashTable.Dispose() instead!");
-				Api.JetTerm(instance);
-			}
-			catch (Exception exception)
-			{
-				try
-				{
-					Trace.WriteLine("Failed to dispose esent instance from finalizer because: " + exception);
-				}
-				catch
-				{
-				}
-			}
+            try
+            {
+                lockObject.EnterWriteLock();
+                try
+                {
+                    Trace.WriteLine(
+                        "Disposing esent resources from finalizer! You should call PersistentHashTable.Dispose() instead!");
+                    Api.JetTerm2(instance, TermGrbit.Complete);
+                }
+                catch (Exception exception)
+                {
+                    try
+                    {
+                        Trace.WriteLine("Failed to dispose esent instance from finalizer, trying abrupt termination." +
+                                        exception);
+                        try
+                        {
+                            Api.JetTerm2(instance, TermGrbit.Abrupt);
+                        }
+                        catch (Exception e)
+                        {
+                            Trace.WriteLine("Could not dispose esent instance abruptly" + e);
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+            finally
+            {
+                lockObject.ExitWriteLock();
+            }
 		}
 
 		[CLSCompliant(false)]
@@ -195,26 +222,38 @@ namespace Rhino.PersistentHashTable
 			if (versionGenerator == null)
 				throw new InvalidOperationException("The PHT was not initialized. Did you forgot to call table.Initialize(); ?");
 
-			for (int i = 0; i < 5; i++)
-			{
-				try
-				{
-					using (var pht = new PersistentHashTableActions(
-						instance, database, HttpRuntime.Cache, Id, versionGenerator,
-						keysColumns, listColumns, replicationColumns, replicationRemovalColumns, dataColumns))
-					{
-						action(pht);
-					}
-					return;
-				}
-				// if we run into a write conflict, we will wait a bit and then retry
-				catch (EsentErrorException e)
-				{
-					if (e.Error != JET_err.WriteConflict)
-						throw;
-					Thread.Sleep(10);
-				}
-			}
+		    var shouldLock = lockObject.IsReadLockHeld == false;
+            try
+            {
+                if(shouldLock)
+                    lockObject.EnterReadLock();
+
+                for (int i = 0; i < 5; i++)
+                {
+                    try
+                    {
+                        using (var pht = new PersistentHashTableActions(
+                            instance, database, HttpRuntime.Cache, Id, versionGenerator,
+                            keysColumns, listColumns, replicationColumns, replicationRemovalColumns, dataColumns))
+                        {
+                            action(pht);
+                        }
+                        return;
+                    }
+                        // if we run into a write conflict, we will wait a bit and then retry
+                    catch (EsentErrorException e)
+                    {
+                        if (e.Error != JET_err.WriteConflict)
+                            throw;
+                        Thread.Sleep(10);
+                    }
+                }
+            }
+            finally
+            {
+                if(shouldLock)
+                    lockObject.ExitReadLock();
+            }
 		}
 	}
 }
