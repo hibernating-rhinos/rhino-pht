@@ -62,7 +62,7 @@ task Compile -depends Init {
 task Test -depends Compile {
   $old = pwd
   cd $build_dir
-  & $tools_dir\xUnit\xunit.console.exe "$build_dir\Rhino.PersistentHashTable.Tests.dll"
+  & $tools_dir\xUnit\xunit.console.clr4.exe "$build_dir\Rhino.PersistentHashTable.Tests.dll"
   cd $old		
 }
 
