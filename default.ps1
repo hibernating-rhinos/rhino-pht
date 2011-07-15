@@ -12,6 +12,8 @@ properties {
   $uploadScript = "C:\Builds\Upload\PublishBuild.build"
 } 
 
+$framework = "4.0"
+
 include .\psake_ext.ps1
 	
 task default -depends Release
@@ -54,13 +56,13 @@ task Init -depends Clean {
 } 
 
 task Compile -depends Init { 
-  exec msbuild "/p:OutDir=""$buildartifacts_dir "" $sln_file"
+  msbuild $sln_file /p:"OutDir=$buildartifacts_dir"
 } 
 
 task Test -depends Compile {
   $old = pwd
   cd $build_dir
-  exec "$tools_dir\xUnit\xunit.console.exe" "$build_dir\Rhino.PersistentHashTable.Tests.dll"
+  & $tools_dir\xUnit\xunit.console.exe "$build_dir\Rhino.PersistentHashTable.Tests.dll"
   cd $old		
 }
 
