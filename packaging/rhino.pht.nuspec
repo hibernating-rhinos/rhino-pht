@@ -5,7 +5,7 @@
     <version>0.0.0</version>
     <authors>Ayende Rahien, Corey Kaylor</authors>
     <owners>Corey Kaylor</owners>
-    <licenseUrl>https://raw.github.com/hibernating-rhinos/rhino-esb/master/license.txt</licenseUrl>
+    <licenseUrl>https://raw.github.com/hibernating-rhinos/rhino-pht/master/license.txt</licenseUrl>
     <projectUrl>https://github.com/hibernating-rhinos/rhino-pht</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Persistent Hash Table using Esent for .NET</description>
