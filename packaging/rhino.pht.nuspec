@@ -15,8 +15,8 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="Rhino.PersistentHashTable.dll" target="lib" />
-    <file src="Rhino.PersistentHashTable.pdb" target="lib" />
-    <file src="Rhino.PersistentHashTable.xml" target="lib" />
+    <file src="**\Rhino.PersistentHashTable.dll" target="lib" />
+    <file src="**\Rhino.PersistentHashTable.pdb" target="lib" />
+    <file src="**\Rhino.PersistentHashTable.xml" target="lib" />
   </files>
 </package>

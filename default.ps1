@@ -2,15 +2,12 @@ properties {
   $base_dir  = resolve-path .
   $lib_dir = "$base_dir\SharedLibs"
   $build_dir = "$base_dir\build" 
-  $buildartifacts_dir = "$build_dir\" 
   $packageinfo_dir = "$base_dir\packaging"
   $sln_file = "$base_dir\Rhino.PersistentHashTable.sln" 
   $version = "1.7.0.0"
-  $humanReadableversion = "1.7"
   $tools_dir = "$base_dir\Tools"
   $release_dir = "$base_dir\Release"
-  $uploadCategory = "Rhino-PHT"
-  $uploadScript = "C:\Builds\Upload\PublishBuild.build"
+  $configuration = "Release"
 } 
 
 $framework = "4.0"
@@ -19,10 +16,10 @@ include .\psake_ext.ps1
 	
 task default -depends Package
 
-task Clean { 
-  remove-item -force -recurse $buildartifacts_dir -ErrorAction SilentlyContinue 
+task Clean {
+  remove-item -force -recurse $build_dir -ErrorAction SilentlyContinue 
   remove-item -force -recurse $release_dir -ErrorAction SilentlyContinue 
-} 
+}
 
 task Init -depends Clean { 
 	Generate-Assembly-Info `
@@ -53,14 +50,18 @@ task Init -depends Clean {
 		-copyright "Hibernating Rhinos & Ayende Rahien 2004 - 2009"
 		
 	new-item $release_dir -itemType directory 
-	new-item $buildartifacts_dir -itemType directory 
-} 
+	new-item $build_dir -itemType directory 
+}
 
-task Compile -depends Init { 
-  msbuild $sln_file /p:"OutDir=$buildartifacts_dir"
-} 
+task Compile35 -depends Init { 
+  msbuild $sln_file /p:"OutDir=$build_dir\3.5\;Configuration=$configuration"
+}
 
-task Test -depends Compile {
+task Compile40 -depends Compile35 { 
+  msbuild $sln_file /p:"TargetFramework=4.0;OutDir=$build_dir\4.0\;Configuration=$configuration"
+}
+
+task Test -depends Compile40 {
   $old = pwd
   cd $build_dir
   & $tools_dir\xUnit\xunit.console.clr4.exe "$build_dir\Rhino.PersistentHashTable.Tests.dll"
