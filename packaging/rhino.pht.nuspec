@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>Rhino.PersistentHashTable</id>
+    <version>0.0.0</version>
+    <authors>Ayende Rahien, Corey Kaylor</authors>
+    <owners>Corey Kaylor</owners>
+    <licenseUrl>https://raw.github.com/hibernating-rhinos/rhino-esb/master/license.txt</licenseUrl>
+    <projectUrl>https://github.com/hibernating-rhinos/rhino-pht</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Persistent Hash Table using Esent for .NET</description>
+    <tags>hashtable persistence rhino esent</tags>
+    <dependencies>
+      <dependency id="Rhino.ServiceBus.References"/>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="Rhino.PersistentHashTable.dll" target="lib" />
+    <file src="Rhino.PersistentHashTable.pdb" target="lib" />
+    <file src="Rhino.PersistentHashTable.xml" target="lib" />
+  </files>
+</package>

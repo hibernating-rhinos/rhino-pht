@@ -3,6 +3,7 @@ properties {
   $lib_dir = "$base_dir\SharedLibs"
   $build_dir = "$base_dir\build" 
   $buildartifacts_dir = "$build_dir\" 
+  $packageinfo_dir = "$base_dir\packaging"
   $sln_file = "$base_dir\Rhino.PersistentHashTable.sln" 
   $version = "1.7.0.0"
   $humanReadableversion = "1.7"
@@ -16,7 +17,7 @@ $framework = "4.0"
 
 include .\psake_ext.ps1
 	
-task default -depends Release
+task default -depends Package
 
 task Clean { 
   remove-item -force -recurse $buildartifacts_dir -ErrorAction SilentlyContinue 
@@ -68,12 +69,14 @@ task Test -depends Compile {
 
 
 task Release -depends Test {
-	& $tools_dir\zip.exe -9 -A -j `
-		$release_dir\Rhino.PersistentHashTable-$humanReadableversion-Build-$env:ccnetnumericlabel.zip `
-		$build_dir\Rhino.PersistentHashTable.dll `
-		$build_dir\Rhino.PersistentHashTable.xml `
-        $build_dir\Esent.Interop.dll `
-		$build_dir\Esent.Interop.xml `
+  cd $build_dir
+	& $tools_dir\7za.exe a $release_dir\Rhino.PersistentHashTable.zip `
+    	*\Esent.Interop.dll `
+    	*\Esent.Interop.xml `
+    	*\Esent.Interop.pdb `
+    	*\Rhino.PersistentHashTable.dll `
+    	*\Rhino.PersistentHashTable.xml `
+    	*\Rhino.PersistentHashTable.pdb `
 		license.txt `
 		acknowledgements.txt
 	if ($lastExitCode -ne 0) {
@@ -81,16 +84,6 @@ task Release -depends Test {
     }
 }
 
-task Upload -depend Release {
-	if (Test-Path $uploadScript ) {
-		$log = git log -n 1 --oneline		
-		msbuild $uploadScript /p:Category=$uploadCategory "/p:Comment=$log" "/p:File=$release_dir\Rhino.PersistentHashTable-$humanReadableversion-Build-$env:ccnetnumericlabel.zip"
-		
-		if ($lastExitCode -ne 0) {
-			throw "Error: Failed to publish build"
-		}
-	}
-	else {
-		Write-Host "could not find upload script $uploadScript, skipping upload"
-	}
+task Package -depends Release {
+  & $tools_dir\NuGet.exe pack $packageinfo_dir\rhino.pht.nuspec -o $release_dir -Version $version -Symbols -BasePath $build_dir
 }
