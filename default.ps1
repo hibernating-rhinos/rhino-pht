@@ -64,7 +64,7 @@ task Compile40 -depends Compile35 {
 task Test -depends Compile40 {
   $old = pwd
   cd $build_dir
-  & $tools_dir\xUnit\xunit.console.clr4.exe "$build_dir\Rhino.PersistentHashTable.Tests.dll"
+  & $tools_dir\xUnit\xunit.console.clr4.exe "$build_dir\4.0\Rhino.PersistentHashTable.Tests.dll"
   cd $old		
 }
 
