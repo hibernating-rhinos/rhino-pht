@@ -53,15 +53,12 @@ task Init -depends Clean {
 	new-item $build_dir -itemType directory 
 }
 
-task Compile35 -depends Init { 
+task Compile -depends Init { 
   msbuild $sln_file /p:"OutDir=$build_dir\3.5\;Configuration=$configuration"
+  msbuild $sln_file /target:Rebuild /p:"TargetFrameworkVersion=4.0;OutDir=$build_dir\4.0\;Configuration=$configuration"
 }
 
-task Compile40 -depends Compile35 { 
-  msbuild $sln_file /p:"TargetFramework=4.0;OutDir=$build_dir\4.0\;Configuration=$configuration"
-}
-
-task Test -depends Compile40 {
+task Test -depends Compile {
   $old = pwd
   cd $build_dir
   & $tools_dir\xUnit\xunit.console.clr4.exe "$build_dir\4.0\Rhino.PersistentHashTable.Tests.dll"
