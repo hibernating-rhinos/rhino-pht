@@ -12,7 +12,7 @@
     <iconUrl>https://github.com/hibernating-rhinos/rhino-esb/wiki/images/rhino-icon.jpg</iconUrl>
     <tags>hashtable persistence rhino esent</tags>
     <dependencies>
-      <dependency id="Rhino.ServiceBus.References"/>
+      <dependency id="ManagedEsent" version="1.6" />
     </dependencies>
   </metadata>
   <files>
