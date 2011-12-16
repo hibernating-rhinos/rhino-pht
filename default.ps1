@@ -4,7 +4,7 @@ properties {
   $build_dir = "$base_dir\build" 
   $packageinfo_dir = "$base_dir\packaging"
   $sln_file = "$base_dir\Rhino.PersistentHashTable.sln" 
-  $version = "1.7.0.0"
+  $version = "1.7.1.0"
   $tools_dir = "$base_dir\Tools"
   $release_dir = "$base_dir\Release"
   $configuration = "Release"
